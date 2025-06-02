@@ -1,0 +1,6 @@
+[submodule "lib/thirdparty/json"]
+	path = lib/thirdparty/json
+	url = https://github.com/nlohmann/json.git
+[submodule "lib/thirdparty/eternal"]
+	path = lib/thirdparty/eternal
+	url = https://github.com/mapbox/eternal.git
