@@ -1,6 +1,18 @@
-#include <neo/neo.hpp>
+#include <iostream>
+#include <neo/JSON.h>
+#include <neo/IApplication.h>
 
-int main()
+class ExampleApplication : public Neo::IApplication
 {
-    return 0;
+public:
+    void Run(const std::span<const char *> &args) override
+    {
+        
+    }
+};
+
+int main(const int argc, const char** argv)
+{
+    ExampleApplication app;
+    BOOTSTRAP_AND_RETURN(app, argc, argv);
 }
