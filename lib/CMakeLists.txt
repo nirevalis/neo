@@ -3,14 +3,16 @@ set(WITH_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/eternal)
 
-
 add_library(neo STATIC
-        src/neo/neo.cpp
-        include/neo/IApplication.h
-        include/neo/JSON.h
+        src/neo/IApplication.cpp
         src/neo/JSON.cpp
-        include/neo/Primitives.h
 )
+
+if(MSVC)
+    target_compile_options(neo PUBLIC /EHsc)
+else()
+    target_compile_options(neo PUBLIC -fexceptions)
+endif()
 
 target_link_libraries(neo PUBLIC eternal nlohmann_json::nlohmann_json)
 

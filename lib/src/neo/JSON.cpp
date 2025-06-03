@@ -2,9 +2,10 @@
 
 namespace Neo
 {
-    nlohmann::json &JSON::Open(const std::filesystem::path &path, JSONOpenMode mode)
+    nlohmann::json &JSON::Open(const std::filesystem::path &path, JSONOpenMode mode, uint8 indentation)
     {
         m_OpenMode = mode;
+        m_Indentation = indentation;
 
         if (HasFlag(mode, JSONOpenMode::Read))
         {
@@ -13,8 +14,8 @@ namespace Neo
             m_Stream.close();
         }
 
-        m_Stream.open(path.string(),  std::ios::out);
-
+        if (HasFlag(mode, JSONOpenMode::Write))
+            m_Stream.open(path.string(),  std::ios::out);
 
         return m_Data;
     }
@@ -23,7 +24,7 @@ namespace Neo
     {
         m_Stream.clear();
         m_Stream.seekp(0, std::ios::beg);
-        m_Stream << m_Data;
+        m_Stream << m_Data.dump(m_Indentation);
     }
 
     void JSON::Close()

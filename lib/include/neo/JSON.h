@@ -18,6 +18,7 @@ namespace Neo
     class JSON
     {
     private:
+        uint8 m_Indentation;
         nlohmann::json m_Data;
         JSONOpenMode m_OpenMode;
         std::fstream m_Stream;
@@ -26,7 +27,9 @@ namespace Neo
         JSON() = default;
         ~JSON() = default;
 
-        [[nodiscard]] nlohmann::json& Open(const std::filesystem::path& path, JSONOpenMode mode = JSONOpenMode::Read);
+        JSON(const JSON&) = delete;
+
+        [[nodiscard]] nlohmann::json& Open(const std::filesystem::path& path, JSONOpenMode mode = JSONOpenMode::Read, uint8 indentation = 0);
         void Flush();
         void Close();
     };
