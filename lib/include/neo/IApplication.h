@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Primitives.h"
+#include <neo/Primitives.h>
 #include <span>
 
 #define BOOTSTRAP_AND_RETURN(app,argc,argv) Neo::Bootstrap(app,argc,argv); return app.GetExitCode();
