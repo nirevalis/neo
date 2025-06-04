@@ -4,3 +4,6 @@
 [submodule "lib/thirdparty/eternal"]
 	path = lib/thirdparty/eternal
 	url = https://github.com/mapbox/eternal.git
+[submodule "lib/thirdparty/cml"]
+	path = lib/thirdparty/cml
+	url = https://github.com/EdenEast/cml.git
