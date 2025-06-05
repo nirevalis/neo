@@ -49,8 +49,8 @@ namespace Neo
             union ValueUnion
             {
                 char* Text;
-                struct { int32_t NumberValue; int32_t _i32fill; };
-                struct { bool BoolValue; uint8_t _i8fill[7]; };
+                struct { int32 NumberValue; int32 _i32fill; };
+                struct { bool BoolValue; uint8 _i8fill[7]; };
 
                 ValueUnion() : Text(nullptr) {}
                 ~ValueUnion() {}
