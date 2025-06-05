@@ -29,6 +29,16 @@ namespace Neo
 
     class Questions
     {
+    public:
+        struct NumberRange
+        {
+            int32 Minimal;
+            int32 Maximal;
+            bool RequireEven;
+
+            NumberRange(int32 min, int32 max, bool requireEven) : Minimal(min), Maximal(max), RequireEven(requireEven) {}
+        };
+
     private:
         friend class Terminal;
 
@@ -109,14 +119,17 @@ namespace Neo
         {
             std::string Text;
             UserInputDataType Type;
+            NumberRange NumberRange;
             Answer Answer;
 
-            Question(std::string  text, UserInputDataType type) : Text(std::move(text)), Type(type), Answer(type) {}
+            Question(std::string text, UserInputDataType type) : Text(std::move(text)), Type(type), NumberRange(INT32_MIN, INT32_MAX, false), Answer(type) {}
+            Question(std::string text, const struct NumberRange& range) : Text(std::move(text)), Type(UserInputDataType::Int32), NumberRange(range), Answer(UserInputDataType::Int32) {}
         };
 
         std::vector<Question> m_Questions;
     public:
         void Add(int32 index, const std::string& text, UserInputDataType type = UserInputDataType::String);
+        void Add(int32 index, const std::string& text, const NumberRange& range);
         [[nodiscard]] const Answer& GetAnswer(int32 index) const;
     };
 
@@ -128,8 +141,6 @@ namespace Neo
         static void applyStyle(TerminalStyle& style);
         static void setup();
         static void printStringColored(const std::string_view& str, const std::string& end = "\n");
-
-        static int32 promptInt32();
     public:
         Terminal() = delete;
         ~Terminal() = delete;
@@ -141,6 +152,8 @@ namespace Neo
         static void Clear();
 
         static void Ask(Questions& questions);
+        static uint32 Menu(const std::vector<std::string>& options);
+        static int32 Getch();
 
         template <typename... Args>
         inline static void Print(std::format_string<Args...> format, Args&&... args)

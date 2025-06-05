@@ -19,6 +19,11 @@ namespace Neo
         m_Questions.emplace(m_Questions.begin() + index, text, type);
     }
 
+    void Questions::Add(int32 index, const std::string &text, const NumberRange& range)
+    {
+        m_Questions.emplace(m_Questions.begin() + index, text, range);
+    }
+
     void Terminal::setup()
     {
         m_StyleStack.emplace(Color::White, Color::Black);
@@ -40,6 +45,7 @@ namespace Neo
 
     void Terminal::PushStyle(const TerminalStyle& style)
     {
+        ENSURE_INITIALIZED();
         m_StyleStack.emplace(style.Foreground, style.Background);
     }
 
@@ -59,13 +65,36 @@ namespace Neo
 
     void Terminal::Clear()
     {
-#if defined(WIN32) || defined(unix) || defined(__APPLE__)
+#if defined(WIN32)
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        COORD coordScreen = {0, 0};
+        DWORD cCharsWritten;
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+        if(!GetConsoleScreenBufferInfo(hConsole, &csbi))
+            return;
+
+        DWORD dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+
+        if(!FillConsoleOutputCharacter(hConsole, (WCHAR)' ', dwConSize, coordScreen, &cCharsWritten))
+            return;
+        if(!GetConsoleScreenBufferInfo(hConsole, &csbi))
+            return;
+        if(!FillConsoleOutputAttribute(hConsole, csbi.wAttributes, dwConSize, coordScreen, &cCharsWritten))
+            return;
+
+        SetConsoleCursorPosition(hConsole, coordScreen);
+#endif
+#ifdef defined(unix) || defined(__APPLE__)
         printf("\x1B[2J\x1B[H");
 #endif
     }
 
     void Terminal::Pause()
     {
+        PushStyle(TerminalStyle{Color::Green, Color::Black});
+        Print("(~) Press any key to continue");
+        PopStyle();
 #ifdef WIN32
         _getch();
 #endif
@@ -102,6 +131,7 @@ namespace Neo
                 }
                 case UserInputDataType::Int32:
                 {
+                    Questions::NumberRange& range = question.NumberRange;
                     while (true)
                     {
                         std::cin >> answer.Value.NumberValue;
@@ -112,6 +142,23 @@ namespace Neo
 
                             PushStyle(TerminalStyle{Color::Red, Color::Black});
                             Print("Value is not a number! Please enter value again.");
+                            PopStyle();
+                        }
+                        else if (answer.Value.NumberValue > range.Maximal)
+                        {
+                            PushStyle(TerminalStyle{Color::Red, Color::Black});
+                            Print("Value is too big! Please enter value again.");
+                            PopStyle();
+                        } else if (answer.Value.NumberValue < range.Minimal)
+                        {
+                            PushStyle(TerminalStyle{Color::Red, Color::Black});
+                            Print("Value is too small! Please enter value again.");
+                            PopStyle();
+                        }
+                        else if (range.RequireEven && answer.Value.NumberValue % 2 != 0)
+                        {
+                            PushStyle(TerminalStyle{Color::Red, Color::Black});
+                            Print("Value is not even! Please enter value again.");
                             PopStyle();
                         }
                         else {
@@ -135,5 +182,61 @@ namespace Neo
     const Questions::Answer& Questions::GetAnswer(int32 index) const
     {
         return m_Questions[index].Answer;
+    }
+
+    int32 Terminal::Getch()
+    {
+        return _getch();
+    }
+
+    uint32 Terminal::Menu(const std::vector<std::string> &options)
+    {
+        int32 choose = 0;
+
+        auto draw = [&]()
+        {
+            Clear();
+
+            for (int32 i = 0; i < options.size();)
+            {
+                const std::string& option = options[i];
+
+                Color c = i == choose ? Color::Green : Color::White;
+
+                PushStyle(TerminalStyle{c, Color::Black});
+                Print("{}. {}", ++i, option);
+                PopStyle();
+            }
+        };
+
+        draw();
+
+        while (true)
+        {
+#ifdef WIN32
+            int32 key = static_cast<int32>(_getch());
+#endif
+            switch (key)
+            {
+                case 13:
+                    return choose;
+                case 80:
+                    if (choose == options.size() - 1)
+                        break;
+                    choose++;
+                    break;
+                case 72:
+                    if (choose == 0)
+                        break;
+                    choose--;
+                    break;
+
+                default:
+                    break;
+            }
+
+            draw();
+        }
+
     }
 }
