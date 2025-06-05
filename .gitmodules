@@ -7,3 +7,6 @@
 [submodule "lib/thirdparty/cml"]
 	path = lib/thirdparty/cml
 	url = https://github.com/EdenEast/cml.git
+[submodule "lib/thirdparty/ftxui"]
+	path = lib/thirdparty/ftxui
+	url = https://github.com/ArthurSonzogni/FTXUI.git
