@@ -9,6 +9,7 @@ namespace Neo
 {
     enum class JSONOpenMode : uint8
     {
+        None  = 0,
         Read = (1 << 0),
         Write = (1 << 1),
     };
@@ -18,6 +19,7 @@ namespace Neo
     class JSON
     {
     private:
+        std::filesystem::path m_FilePath;
         uint8 m_Indentation;
         nlohmann::json m_Data;
         JSONOpenMode m_OpenMode;

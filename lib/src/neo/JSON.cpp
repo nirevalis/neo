@@ -1,4 +1,5 @@
 #include <neo/JSON.h>
+#include <neo/Terminal.h>
 
 namespace Neo
 {
@@ -6,34 +7,39 @@ namespace Neo
     {
         m_OpenMode = mode;
         m_Indentation = indentation;
+        m_FilePath = path;
 
         if (HasFlag(mode, JSONOpenMode::Read))
         {
-            m_Stream.open(path.string(),  std::ios::in);
-            m_Stream >> m_Data;
-            m_Stream.close();
-        }
+            std::ifstream inFile(path);
+            if (!inFile)
+                Terminal::Print("Failed to open JSON file for reading: {}", path.string());
 
-        if (HasFlag(mode, JSONOpenMode::Write))
-            m_Stream.open(path.string(),  std::ios::out);
+            inFile >> m_Data;
+        }
 
         return m_Data;
     }
 
     void JSON::Flush()
     {
-        m_Stream.clear();
-        m_Stream.seekp(0, std::ios::beg);
-        m_Stream << m_Data.dump(m_Indentation);
+        if (!HasFlag(m_OpenMode, JSONOpenMode::Write))
+            return;
+
+        std::ofstream outFile(m_FilePath);
+        if (!outFile)
+            Terminal::Print("Failed to open JSON file for writing: {}", m_FilePath.string());
+
+        outFile << m_Data.dump(m_Indentation);
     }
 
     void JSON::Close()
     {
-        if (m_Stream.is_open())
+        if (HasFlag(m_OpenMode, JSONOpenMode::Write))
         {
             Flush();
-            m_Stream.close();
         }
+        m_OpenMode = JSONOpenMode::None;
+        m_Data.clear();
     }
-
 }
